@@ -1,29 +1,62 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"log/slog"
+	"time"
 
-	configloader "github.com/cafpleon/filingo-util-config"
-	_ "github.com/jackc/pgx/v5/stdlib" // El driver de pgx para database/sql
+	// Ahora solo importamos pgxpool directamente
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	configloader "github.com/cafpleon/filingo-util-config" // Tu librería de config
 )
 
-func Connect(cfg configloader.DBConfig) (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name)
+// Connect crea y devuelve un nuevo y performante pool de conexiones de pgx.
+// La firma ahora devuelve el tipo específico *pgxpool.Pool.
+func Connect(ctx context.Context, cfg configloader.DBConfig) (*pgxpool.Pool, error) {
+	// 1. Construir la URL de conexión (DSN)
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.Name,
+	)
+	slog.Info("Intentando conectar a la base de datos con pgxpool", "host", cfg.Host, "db", cfg.Name)
 
-	db, err := sql.Open("pgx", dsn)
+	// 2. Parsear la configuración del pool a partir del DSN.
+	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("falló al abrir la conexión a postgres: %w", err)
+		return nil, fmt.Errorf("no se pudo parsear la configuración del pool de pgx: %w", err)
 	}
 
-	if err = db.Ping(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("falló el ping a postgres: %w", err)
+	// 3. Aplicar la configuración específica del pool.
+	poolConfig.MaxConns = cfg.MaxConns
+	poolConfig.MinConns = cfg.MinConns
+	poolConfig.MaxConnLifetime = cfg.MaxConnLifeTime
+	poolConfig.MaxConnIdleTime = cfg.MaxConnIdleTime
+	poolConfig.HealthCheckPeriod = cfg.HealthCheckPeriod
+
+	// Se puede añadir un timeout al contexto para la conexión inicial.
+	connectCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// 4. Crear el pool de conexiones usando directamente pgxpool.
+	pool, err := pgxpool.NewWithConfig(connectCtx, poolConfig)
+	if err != nil {
+		return nil, fmt.Errorf("no se pudo crear el pool de conexiones: %w", err)
 	}
 
-	// Aquí podrías configurar el pool de conexiones:
-	// db.SetMaxOpenConns(...)
+	// 5. Verificar que la conexión está viva.
+	pingCtx, cancelPing := context.WithTimeout(ctx, 3*time.Second)
+	defer cancelPing()
 
-	return db, nil
+	if err := pool.Ping(pingCtx); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("no se pudo hacer ping a la base de datos: %w", err)
+	}
+
+	slog.Info("Conexión a la base de datos (pgxpool) establecida exitosamente.")
+	return pool, nil
 }
