@@ -16,7 +16,7 @@ import (
 // La firma ahora devuelve el tipo específico *pgxpool.Pool.
 func Connect(ctx context.Context, cfg configloader.DBConfig) (*pgxpool.Pool, error) {
 	// 1. Construir la URL de conexión (DSN)
-	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.User,
 		cfg.Password,
 		cfg.Host,
