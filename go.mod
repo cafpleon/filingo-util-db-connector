@@ -1,4 +1,4 @@
-module github.com/cafpleon/filingo-util-connector
+module github.com/cafpleon/filingo-util-db-connector
 
 go 1.24.2
 
