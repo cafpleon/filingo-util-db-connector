@@ -8,9 +8,15 @@ import (
 	_ "github.com/go-sql-driver/mysql" // El driver de MySQL
 )
 
-func Connect(cfg configloader.DBConfig) (*sql.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
+func ConnectToMysql(cfg configloader.DBConfig) (*sql.DB, error) {
+	//  Construir la URL de conexión (DSN)
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.Password,
+		cfg.Name,
+	)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
