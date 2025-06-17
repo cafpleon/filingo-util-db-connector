@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	configloader "github.com/cafpleon/filingo-util-config" // Tu librería de config
-	"github.com/cafpleon/filingo-util-connector/mysql"     // Importa tu sub-paquete mysql
-	"github.com/cafpleon/filingo-util-connector/postgres"  // Importa tu sub-paquete postgres
+	configloader "github.com/cafpleon/filingo-util-config"   // Tu librería de config
+	"github.com/cafpleon/filingo-util-db-connector/mysql"    // Importa tu sub-paquete mysql
+	"github.com/cafpleon/filingo-util-db-connector/postgres" // Importa tu sub-paquete postgres
 )
 
 // Connect es la función principal y pública. Actúa como una fábrica que
