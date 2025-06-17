@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	configloader "github.com/cafpleon/filingo-config"
+	configloader "github.com/cafpleon/filingo-util-config"
 	_ "github.com/jackc/pgx/v5/stdlib" // El driver de pgx para database/sql
 )
 

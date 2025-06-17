@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	configloader "github.com/cafpleon/filingo-config"
+	configloader "github.com/cafpleon/filingo-util-config"
 	_ "github.com/go-sql-driver/mysql" // El driver de MySQL
 )
 
