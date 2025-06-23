@@ -6,11 +6,28 @@ import (
 	"log/slog"
 	"time"
 
-	// Ahora solo importamos pgxpool directamente
+	"github.com/jackc/pgx/v5" // Lo usamos solo por el error pgx.ErrNoRows
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	configloader "github.com/cafpleon/filingo-util-config" // Tu librería de config
 )
+
+// IDBPool define el contrato mínimo que cualquier repositorio necesitará
+// para interactuar con el pool de conexiones de pgx.
+type IDBPool interface {
+	// Método de pgx para consultas que devuelven múltiples filas
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+
+	// Método de pgx para consultas que devuelven una sola fila
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+
+	// Método de pgx para operaciones de escritura (INSERT, UPDATE, DELETE)
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+
+	// Método para cerrar el pool
+	Close()
+}
 
 // Connect crea y devuelve un nuevo y performante pool de conexiones de pgx.
 // La firma ahora devuelve el tipo específico *pgxpool.Pool.
