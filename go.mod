@@ -2,7 +2,7 @@ module github.com/cafpleon/filingo-util-db-connector
 
 go 1.24.2
 
-require github.com/cafpleon/filingo-util-config v0.0.0-20250617121604-6d73fd519082
+require github.com/cafpleon/filingo-util-config v0.0.0-20250620151549-1cce834ddca9
 
 require (
 	github.com/go-sql-driver/mysql v1.9.3
