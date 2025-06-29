@@ -25,6 +25,10 @@ type IDBPool interface {
 	// Método de pgx para operaciones de escritura (INSERT, UPDATE, DELETE)
 	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
 
+	//  Begin inicia una transacción. El objeto Tx también cumple la interfaz IDBPool
+	// (sin los métodos Begin y Close), por lo que podemos reutilizarlo.
+	Begin(ctx context.Context) (pgx.Tx, error)
+
 	// Método para cerrar el pool
 	Close()
 }
